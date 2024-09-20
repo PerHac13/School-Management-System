@@ -16,3 +16,16 @@ nlohmann::json Student::toJson() {
         {"age", age}
     };
 }
+
+std::shared_ptr<Student> createStudent() {
+    std::string name;
+    std::string rollno;
+    int age;
+    std::cout << "Enter the name of the student: ";
+    std::getline(std::cin, name);
+    std::cout << "Enter the roll number of the student: ";
+    std::getline(std::cin, rollno);
+    std::cout << "Enter the age of the student: ";
+    std::cin >> age;
+    return std::make_shared<Student>(name, rollno, age);
+}
