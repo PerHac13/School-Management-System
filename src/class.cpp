@@ -8,6 +8,14 @@ void Class::addStudent(const std::shared_ptr<Student>& student) {
     students.push_back(student);
 }
 
+int Class::getClassNumber() const {
+    return classNumber;
+}
+
+std::string Class::getClassTeacher() const {
+    return classTeacher;
+}
+
 void Class::displayClassInfo() const {
     std::cout << "Class number: " << classNumber << std::endl;
     std::cout << "Class teacher: " << classTeacher << std::endl;
@@ -26,4 +34,14 @@ nlohmann::json Class::toJson() const {
         jsonData["students"].push_back(student->toJson());
     }
     return jsonData;
+}
+
+std::shared_ptr<Class> createClass() {
+    std::string teacher;
+    int classNumber;
+    std::cout << "Enter the class number: ";
+    std::cin >> classNumber;
+    std::cout << "Enter the name of the class teacher: ";
+    std::getline(std::cin, teacher);
+    return std::make_shared<Class>(classNumber, teacher);
 }
