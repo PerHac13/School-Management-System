@@ -14,3 +14,5 @@ class Student {
         void display() const;
         nlohmann::json toJson();
 };
+
+std::shared_ptr<Student> createStudent();
