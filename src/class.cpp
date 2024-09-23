@@ -41,6 +41,7 @@ std::shared_ptr<Class> createClass() {
     int classNumber;
     std::cout << "Enter the class number: ";
     std::cin >> classNumber;
+    std::cin.ignore();
     std::cout << "Enter the name of the class teacher: ";
     std::getline(std::cin, teacher);
     return std::make_shared<Class>(classNumber, teacher);
