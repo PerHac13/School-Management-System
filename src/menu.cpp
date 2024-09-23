@@ -11,8 +11,8 @@ void displayMainMenu() {
     std::cout << "\nMain Menu\n";
     std::cout << "1. Create a new school\n";
     std::cout << "2. Select an existing school\n";
-    std::cout << "4. Load from file\n";
-    std::cout << "3. Exit\n";
+    std::cout << "3. Save to file\n";
+    std::cout << "4. Exit\n";
     std::cout << "Enter your choice: ";
 }
 
@@ -50,7 +50,7 @@ void handleMainMenu(std::vector<std::shared_ptr<School>>& schools) {
             for (const auto& school : schools) {
                 jsonData.push_back(nlohmann::json::parse(school->toJson().dump()));
             }
-            std::ofstream file("data/schools.json");
+            std::ofstream file("../data/schools.json");
             if(file.is_open()) {
                 file << jsonData.dump(4);
                 std::cout << "Data saved to data/schools.json" << std::endl;
