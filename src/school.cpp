@@ -43,7 +43,7 @@ void School::saveToFile() const {
     nlohmann::json jsonData = toJson();
     std::string filename = schoolName;
     std::replace(filename.begin(), filename.end(), ' ', '_');
-    filename = "data/" + filename + ".json";
+    filename = "../data/"+filename + ".json";
 
     std::ofstream file(filename);
     if(file.is_open()) {
@@ -57,7 +57,7 @@ void School::saveToFile() const {
 
 std::vector<School> School::loadFromFileJSON(const std::string& filename) {
     std::vector<School> schools;
-    std::ifstream file("data/" + filename);
+    std::ifstream file("../data/" + filename);
     
     if(file.is_open()) {
         nlohmann::json jsonData;
