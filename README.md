@@ -76,9 +76,9 @@ school_management_system/
 ### Milestone 1: Basic Structure and Functionality
 
 - [x] Set up project structure with CMake
-- [ ] Implement basic classes (School, Class, Student)
-- [ ] Create a simple command-line interface
-- [ ] Implement JSON serialization and deserialization
+- [x] Implement basic classes (School, Class, Student)
+- [x] Create a simple command-line interface
+- [x] Implement JSON serialization and deserialization
 
 ### Milestone 2: Enhanced Functionality and Error Handling
 
