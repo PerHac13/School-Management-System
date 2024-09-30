@@ -72,8 +72,9 @@ void displaySchoolMenu(const std::string& schoolName) {
     std::cout << "\nSchool: " << schoolName << std::endl;
     std::cout << "1. Create a new class\n";
     std::cout << "2. Select an existing class\n";
-    std::cout << "3. Save to individuals file\n";
-    std::cout << "4. Go back\n";
+    std::cout << "3. Delete an existing class\n";
+    std::cout << "4. Save to individuals file\n";
+    std::cout << "5. Go back\n";
     std::cout << "Enter your choice: ";
 }
 
@@ -114,10 +115,18 @@ void handleSchoolMenu(std::shared_ptr<School> school) {
                 break;
             }
             case 3: {
-                school->saveToFile();
+                int classNumber;
+                std::cout << "Enter class number to delete: ";
+                std::cin >> classNumber;
+                std::cin.ignore();
+                school->deleteClass(classNumber);
                 break;
             }
             case 4: {
+                school->saveToFile();
+                break;
+            }
+            case 5: {
                 return;
             }
             default: {

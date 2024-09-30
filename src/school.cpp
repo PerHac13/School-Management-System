@@ -82,6 +82,23 @@ std::vector<School> School::loadFromFileJSON(const std::string& filename) {
     return schools;
 }
 
+void School::deleteClass(int classNumber) {
+    auto it = std::find_if(classes.begin(), classes.end(),
+        [classNumber](const std::shared_ptr<Class>& c) { return c->getClassNumber() == classNumber; });
+    
+    if (it != classes.end()) {
+        classes.erase(it);
+        std::cout << "Class " << classNumber << " has been deleted." << std::endl;
+    } else {
+        std::cout << "Class " << classNumber << " not found." << std::endl;
+    }
+}
+
+void School::changeSchoolName(const std::string& newName) {
+    schoolName = newName;
+    std::cout << "School name has been changed to: " << newName << std::endl;
+}
+
 // Function implementation
 std::shared_ptr<School> createSchool() {
     std::string schoolName;
