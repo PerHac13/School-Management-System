@@ -2,7 +2,7 @@
 #include <string>
 #include <vector>
 #include <memory>
-#include "../lib/json.hpp"
+#include <nlohmann/json.hpp>
 
 #include "student.h"
 

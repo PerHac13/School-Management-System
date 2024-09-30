@@ -1,6 +1,6 @@
 #pragma once
 #include <string>
-#include "../lib/json.hpp"
+#include <nlohmann/json.hpp>
 
 class Student {
     private: 
