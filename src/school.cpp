@@ -6,17 +6,23 @@
 
 // Class members implementation
 
-School::School(const std::string& schoolName) : schoolName(schoolName) {}
+School::School(const std::string& schoolName) : schoolName(schoolName) {
+    classes.reserve(15);
+}
 
-void School::addClass(const std::shared_ptr<Class>& schoolClass) {
-    classes.push_back(schoolClass);
+void School::reserveClassCapacity(size_t capacity) {
+    classes.reserve(capacity);
+}
+
+void School::addClass(std::unique_ptr<Class> schoolClass) {
+    classes.push_back(std::move(schoolClass));
 }
 
 std::string School::getSchoolName() const {
     return schoolName;
 }
 
-std::vector<std::shared_ptr<Class>> School::getClasses() const {
+const std::vector<std::unique_ptr<Class>>& School::getClasses() const {
     return classes;
 }
 
@@ -38,12 +44,15 @@ nlohmann::json School::toJson() const {
     return jsonData;
 }
 
-// Phase 2: Save the school data to a file individually
-void School::saveToFile() const {
-    nlohmann::json jsonData = toJson();
+std::string School::generateFilename(const std::string& schoolName) {
     std::string filename = schoolName;
     std::replace(filename.begin(), filename.end(), ' ', '_');
-    filename = "../data/"+filename + ".json";
+    return "../data/" + filename + ".json";
+}
+
+void School::saveToFile() const {
+    nlohmann::json jsonData = toJson();
+    std::string filename = School::generateFilename(schoolName);
 
     std::ofstream file(filename);
     if(file.is_open()) {
@@ -55,8 +64,17 @@ void School::saveToFile() const {
     }
 }
 
+School School::createFromJson(const nlohmann::json& jsonData) {
+    School school(jsonData["schoolName"]);
+    for (const auto& classJSON : jsonData["classes"]) {
+        school.addClass(Class::createFromJson(classJSON));
+    }
+    return school;
+}
+
 std::vector<School> School::loadFromFileJSON(const std::string& filename) {
     std::vector<School> schools;
+    schools.reserve(10);
     std::ifstream file("../data/" + filename);
     
     if(file.is_open()) {
@@ -65,15 +83,7 @@ std::vector<School> School::loadFromFileJSON(const std::string& filename) {
         file.close();
 
         for (const auto& schoolJSON :jsonData){
-            School school(schoolJSON["schoolName"]);
-            for (const auto& classJSON : schoolJSON["classes"]) {
-                std::shared_ptr<Class> schoolClass = std::make_shared<Class>(classJSON["classNumber"], classJSON["classTeacher"]);
-                for (const auto& studentJSON : classJSON["students"]) {
-                    schoolClass->addStudent(std::make_shared<Student>(studentJSON["name"], studentJSON["rollno"] ,studentJSON["age"]));
-                }
-                school.addClass(schoolClass);
-            }
-            schools.push_back(school);
+            schools.push_back(School::createFromJson(schoolJSON));
         }
         std::cout << "Data loaded from " << filename << std::endl;
     }else {
@@ -84,7 +94,7 @@ std::vector<School> School::loadFromFileJSON(const std::string& filename) {
 
 void School::deleteClass(int classNumber) {
     auto it = std::find_if(classes.begin(), classes.end(),
-        [classNumber](const std::shared_ptr<Class>& c) { return c->getClassNumber() == classNumber; });
+        [classNumber](const std::unique_ptr<Class>& c) { return c->getClassNumber() == classNumber; });
     
     if (it != classes.end()) {
         classes.erase(it);
@@ -97,12 +107,4 @@ void School::deleteClass(int classNumber) {
 void School::changeSchoolName(const std::string& newName) {
     schoolName = newName;
     std::cout << "School name has been changed to: " << newName << std::endl;
-}
-
-// Function implementation
-std::shared_ptr<School> createSchool() {
-    std::string schoolName;
-    std::cout << "Enter the school name: ";
-    std::getline(std::cin, schoolName);
-    return std::make_shared<School>(schoolName);
 }
