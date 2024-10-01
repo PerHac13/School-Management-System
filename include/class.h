@@ -15,7 +15,7 @@ class Class {
     public:
         Class(int classNumber, const std::string& classTeacher);
         
-        void addStudent(const std::unique_ptr<Student> student);
+        void addStudent(std::unique_ptr<Student> student);
         int getClassNumber() const;
         std::string getClassTeacher() const;
         void displayClassInfo() const;
