@@ -22,14 +22,14 @@ std::string getFileName() {
 }
 
 int main() {
-    std::vector<std::shared_ptr<School>> schools;
+    std::vector<std::unique_ptr<School>> schools;
     
     std::string fileName = getFileName();
     
     try {
         auto loadedSchools = School::loadFromFileJSON(fileName);
-        for (const auto& school : loadedSchools) {
-            schools.push_back(std::make_shared<School>(school));
+        for (auto& school : loadedSchools) {
+            schools.push_back(std::make_unique<School>(std::move(school)));
         }
         std::cout << "Successfully loaded data from " << fileName << std::endl;
     } catch (const std::exception& e) {
