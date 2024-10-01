@@ -2,10 +2,17 @@
 
 #include "class.h"
 
-Class::Class(int classNumber, const std::string& classTeacher) : classNumber(classNumber), classTeacher(classTeacher) {}
+Class::Class(int classNumber, const std::string& classTeacher) 
+: classNumber(classNumber), classTeacher(classTeacher) {
+    students.reserve(50);
+}
 
-void Class::addStudent(const std::shared_ptr<Student>& student) {
-    students.push_back(student);
+void Class::reserveStudentCapacity(size_t capacity){
+    students.reserve(capacity);
+}
+
+void Class::addStudent(const std::unique_ptr<Student> student) {
+    students.push_back(std::move(student));
 }
 
 int Class::getClassNumber() const {
@@ -36,13 +43,10 @@ nlohmann::json Class::toJson() const {
     return jsonData;
 }
 
-std::shared_ptr<Class> createClass() {
-    std::string teacher;
-    int classNumber;
-    std::cout << "Enter the class number: ";
-    std::cin >> classNumber;
-    std::cin.ignore();
-    std::cout << "Enter the name of the class teacher: ";
-    std::getline(std::cin, teacher);
-    return std::make_shared<Class>(classNumber, teacher);
+std::unique_ptr<Class> Class::createFromJson(const nlohmann::json& jsonData) {
+    std::unique_ptr<Class> classPtr = std::make_unique<Class>(jsonData["classNumber"], jsonData["classTeacher"]);
+    for (const auto& studentJSON : jsonData["students"]) {
+        classPtr->addStudent(Student::createFromJson(studentJSON));
+    }
+    return classPtr;
 }
