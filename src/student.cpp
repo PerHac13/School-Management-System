@@ -9,6 +9,10 @@ void Student::display() const {
     std::cout << "Age: " << age << std::endl;
 }
 
+std::string Student::getRollNo() const {
+    return rollno;
+}
+
 nlohmann::json Student::toJson() const{
     return nlohmann::json {
         {"name", name},
@@ -18,5 +22,9 @@ nlohmann::json Student::toJson() const{
 }
 
 std::unique_ptr<Student> Student::createFromJson(const nlohmann::json& jsonData) {
-    return std::make_unique<Student>(jsonData["name"], jsonData["rollno"], jsonData["age"]);
+    return std::make_unique<Student>(jsonData["name"], jsonData["rollno"], jsonData["age"].get<int>());
+}
+
+bool Student::operator == (const Student& other) const {
+    return rollno == other.rollno;
 }
