@@ -27,4 +27,6 @@ class School {
         static std::vector<School> loadFromFileJSON(const std::string& filename);
         static School createFromJson(const nlohmann::json& jsonData);
         static std::string generateFilename(const std::string& schoolName);
+
+        bool hasClass(const Class& other) const;
 };

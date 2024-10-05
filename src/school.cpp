@@ -14,7 +14,20 @@ void School::reserveClassCapacity(size_t capacity) {
     classes.reserve(capacity);
 }
 
+bool School::hasClass(const Class& other) const {
+    for (const auto& schoolClass : classes) {
+        if (*schoolClass == other) {
+            return true;
+        }
+    }
+    return false;
+}
+
 void School::addClass(std::unique_ptr<Class> schoolClass) {
+    if (hasClass(*schoolClass)) {
+        std::cout << "Class " << schoolClass->getClassNumber() << " already exists in the school." << std::endl;
+        return;
+    }
     classes.push_back(std::move(schoolClass));
 }
 

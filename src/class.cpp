@@ -7,11 +7,32 @@ Class::Class(int classNumber, const std::string& classTeacher)
     students.reserve(50);
 }
 
+Class::Class(int classNumber, const std::string& classTeacher, const Class& other) 
+    : classNumber(classNumber), classTeacher(classTeacher) {
+    students.reserve(50);
+    for (const auto& student : other.students) {
+        students.push_back(std::make_unique<Student>(*student));
+    }
+}
+
 void Class::reserveStudentCapacity(size_t capacity){
     students.reserve(capacity);
 }
 
+bool Class::hasStudent(const Student& student) const {
+    for (const auto& studentPtr : students) {
+        if (*studentPtr == student) {
+            return true;
+        }
+    }
+    return false;
+}
+
 void Class::addStudent(std::unique_ptr<Student> student) {
+    if(hasStudent(*student)){
+        std::cout << "Student with roll number " << student->getRollNo() << " already exists in the class." << std::endl;
+        return;
+    }
     students.push_back(std::move(student));
 }
 
@@ -32,6 +53,18 @@ void Class::displayClassInfo() const {
         // std::cout << "\n----------------" << std::endl;
         student->display();
     }
+}
+
+bool Class::operator == (const Class& other) const {
+    return classNumber == other.classNumber && classTeacher == other.classTeacher;
+}
+
+bool Class::operator < (const Class& other) const {
+    return students.size() < other.students.size();
+}
+
+bool Class::operator > (const Class& other) const {
+    return students.size() > other.students.size();
 }
 
 nlohmann::json Class::toJson() const {

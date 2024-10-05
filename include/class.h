@@ -14,7 +14,12 @@ class Class {
 
     public:
         Class(int classNumber, const std::string& classTeacher);
-        
+        Class(const Class& other) = delete;
+        Class(int classNumber, const std::string& classTeacher, const Class& other);
+        // Class& operator = (const Class& other) = delete;
+        Class(Class&& other) noexcept = default; // Moving purpose
+        Class& operator=(Class&& other) noexcept = default;
+
         void addStudent(std::unique_ptr<Student> student);
         int getClassNumber() const;
         std::string getClassTeacher() const;
@@ -23,4 +28,9 @@ class Class {
         void reserveStudentCapacity(size_t capacity);
         
         static std::unique_ptr<Class> createFromJson(const nlohmann::json& jsonData);
+        bool hasStudent(const Student& student) const;
+
+        bool operator == (const Class& other) const;
+        bool operator < (const Class& other) const;
+        bool operator > (const Class& other) const;
 };
