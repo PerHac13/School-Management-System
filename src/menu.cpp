@@ -101,10 +101,11 @@ void handleMainMenu(std::vector<std::unique_ptr<School>>& schools) {
 void displaySchoolMenu(const std::string& schoolName) {
     printHeader("School: " + schoolName);
     std::cout << "1. Create a new class\n";
-    std::cout << "2. Select an existing class\n";
-    std::cout << "3. Delete an existing class\n";
-    std::cout << "4. Save to individual file\n";
-    std::cout << "5. Go back\n";
+    std::cout << "2. Create a new class with existing class\n";
+    std::cout << "3. Select an existing class\n";
+    std::cout << "4. Delete an existing class\n";
+    std::cout << "5. Save to individual file\n";
+    std::cout << "6. Go back\n";
     std::cout << std::string(50, '-') << std::endl;
     std::cout << "Enter your choice: ";
 }
@@ -131,6 +132,35 @@ void handleSchoolMenu(std::unique_ptr<School>& school) {
                     std::cin.get();
                     break;
                 }
+                printHeader("Select a Class to Copy");
+                for (size_t i = 0; i < classes.size(); ++i) {
+                    std::cout << i + 1 << ". Class " << classes[i]->getClassNumber() 
+                            << " by " << classes[i]->getClassTeacher() << std::endl;
+                }
+                std::cout << std::string(50, '-') << std::endl;
+                std::cout << "Select a class by number: ";
+                int classChoice;
+                std::cin >> classChoice;
+                std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+
+                if (classChoice > 0 && classChoice <= static_cast<int>(classes.size())) {
+                    school->addClass(SchoolFactory::createClass(classes[classChoice - 1]));
+                    std::cout << "New class created and added successfully. Press Enter to continue...";
+                    std::cin.get();
+                } else {
+                    std::cout << "Invalid choice. Press Enter to continue...";
+                    std::cin.get();
+                }
+                break;
+            }
+            case 3: {
+                const auto& classes = school->getClasses();
+                if (classes.empty()) {
+                    std::cout << "No classes available. Please create a new class." << std::endl;
+                    std::cout << "Press Enter to continue...";
+                    std::cin.get();
+                    break;
+                }
                 printHeader("Select a Class");
                 for (size_t i = 0; i < classes.size(); ++i) {
                     std::cout << i + 1 << ". Class " << classes[i]->getClassNumber() 
@@ -150,7 +180,7 @@ void handleSchoolMenu(std::unique_ptr<School>& school) {
                 }
                 break;
             }
-            case 3: {
+            case 4: {
                 int classNumber;
                 std::cout << "Enter class number to delete: ";
                 std::cin >> classNumber;
@@ -160,13 +190,13 @@ void handleSchoolMenu(std::unique_ptr<School>& school) {
                 std::cin.get();
                 break;
             }
-            case 4: {
+            case 5: {
                 school->saveToFile();
                 std::cout << "Press Enter to continue...";
                 std::cin.get();
                 break;
             }
-            case 5: {
+            case 6: {
                 return;
             }
             default: {
