@@ -19,6 +19,18 @@ std::unique_ptr<Class> SchoolFactory::createClass() {
     std::getline(std::cin, teacher);
     return std::make_unique<Class>(classNumber, teacher);
 }
+
+std::unique_ptr<Class> SchoolFactory::createClass(const std::unique_ptr<Class>& existingClass) {
+    int classNumber;
+    std::string teacher;
+    std::cout << "Enter the new class number: ";
+    std::cin >> classNumber;
+    std::cin.ignore();
+    std::cout << "Enter the name of the new class teacher: ";
+    std::getline(std::cin, teacher);
+    return std::make_unique<Class>(classNumber, teacher, *existingClass);
+}
+
 std::unique_ptr<Student> SchoolFactory::createStudent() {
     std::string name, rollno;
     int age;
