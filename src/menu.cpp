@@ -20,11 +20,11 @@ void clearScreen() {
 
 void printHeader(const std::string& title) {
     clearScreen();
-    fmt::print("{}\n", fmt::format(fg(fmt::color::gold), std::string(50, '*')));
-    fmt::print("*{:^48}*\n", "");
-    fmt::print("*{:^48}*\n", title);
-    fmt::print("*{:^48}*\n", "");
-    fmt::print("{}\n", fmt::format(fg(fmt::color::gold), std::string(50, '*')));
+    fmt::print(fg(fmt::color::gold), "{}\n", std::string(50, '*'));
+    fmt::print(fg(fmt::color::gold), "*{:^48}*\n", "");
+    fmt::print(fg(fmt::color::gold), "*{:^48}*\n", title);
+    fmt::print(fg(fmt::color::gold), "*{:^48}*\n", "");
+    fmt::print(fg(fmt::color::gold), "{}\n", std::string(50, '*'));
 }
 
 void displayMainMenu() {
