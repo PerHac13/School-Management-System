@@ -27,6 +27,21 @@ void printHeader(const std::string& title) {
     fmt::print(fg(fmt::color::gold), "{}\n", std::string(50, '*'));
 }
 
+bool updateJson(std::vector<std::unique_ptr<School>>& schools){
+    nlohmann::json jsonData;
+    for (const auto& school : schools) {
+        jsonData.push_back(school->toJson());
+    }
+    std::ofstream file("../data/schools.json");
+    if(file.is_open()) {
+        file << jsonData.dump(4);
+        file.close();
+        return true;
+    } else {
+        return false;
+    }
+}
+
 void displayMainMenu() {
     printHeader("Main Menu");
     fmt::print("1. Create a new school\n");
@@ -47,6 +62,7 @@ void handleMainMenu(std::vector<std::unique_ptr<School>>& schools) {
             schools.push_back(SchoolFactory::createSchool());
             fmt::print("School created successfully. Press Enter to continue...");
             std::cin.get();
+            updateJson(schools);
             break;
         }
         case 2: {
@@ -66,7 +82,7 @@ void handleMainMenu(std::vector<std::unique_ptr<School>>& schools) {
             std::cin >> schoolChoice;
             std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
             if (schoolChoice > 0 && schoolChoice <= static_cast<int>(schools.size())) {
-                handleSchoolMenu(schools[schoolChoice - 1]);
+                handleSchoolMenu(schools[schoolChoice - 1], schools, updateJson);
             } else {
                 fmt::print("Invalid choice. Press Enter to continue...");
                 std::cin.get();
@@ -74,15 +90,9 @@ void handleMainMenu(std::vector<std::unique_ptr<School>>& schools) {
             break;
         }
         case 3: {
-            nlohmann::json jsonData;
-            for (const auto& school : schools) {
-                jsonData.push_back(school->toJson());
-            }
-            std::ofstream file("../data/schools.json");
-            if(file.is_open()) {
-                file << jsonData.dump(4);
+            // TODO: Save to file specific file
+            if(updateJson(schools)) {
                 fmt::print("Data saved to data/schools.json\n");
-                file.close();
             } else {
                 fmt::print(fg(fmt::color::red), "Error: Could not open file.\n");
             }
@@ -111,7 +121,7 @@ void displaySchoolMenu(const std::string& schoolName) {
     fmt::print("Enter your choice: ");
 }
 
-void handleSchoolMenu(std::unique_ptr<School>& school) {
+void handleSchoolMenu(std::unique_ptr<School>& school, std::vector<std::unique_ptr<School>>& schools, bool (&updateJsonFunc)(std::vector<std::unique_ptr<School>>&)) {
     while (true) {
         displaySchoolMenu(school->getSchoolName());
         int choice;
@@ -123,6 +133,7 @@ void handleSchoolMenu(std::unique_ptr<School>& school) {
                 school->addClass(SchoolFactory::createClass());
                 fmt::print("Class added successfully. Press Enter to continue...");
                 std::cin.get();
+                updateJsonFunc(schools);
                 break;
             }
             case 2: {
@@ -147,6 +158,7 @@ void handleSchoolMenu(std::unique_ptr<School>& school) {
                     school->addClass(SchoolFactory::createClass(classes[classChoice - 1]));
                     fmt::print("New class created and added successfully. Press Enter to continue...");
                     std::cin.get();
+                    updateJsonFunc(schools);
                 } else {
                     fmt::print("Invalid choice. Press Enter to continue...");
                     std::cin.get();
@@ -172,7 +184,7 @@ void handleSchoolMenu(std::unique_ptr<School>& school) {
                 std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 
                 if (classChoice > 0 && classChoice <= static_cast<int>(classes.size())) {
-                    handleClassMenu(classes[classChoice - 1]);
+                    handleClassMenu(classes[classChoice - 1], schools, updateJsonFunc);
                 } else {
                     fmt::print("Invalid choice. Press Enter to continue...");
                     std::cin.get();
@@ -181,12 +193,25 @@ void handleSchoolMenu(std::unique_ptr<School>& school) {
             }
             case 4: {
                 int classNumber;
+                const auto& classes = school->getClasses();
+                if (classes.empty()) {
+                    fmt::print("No classes available. Please create a new class.\n");
+                    fmt::print("Press Enter to continue...");
+                    std::cin.get();
+                    break;
+                }
+                printHeader("Select a Class to delete");
+                for (size_t i = 0; i < classes.size(); ++i) {
+                    fmt::print("{}. Class {} by {}\n", i + 1, classes[i]->getClassNumber(), classes[i]->getClassTeacher());
+                }
+                fmt::print("{}\n", std::string(50, '-'));
                 fmt::print("Enter class number to delete: ");
                 std::cin >> classNumber;
                 std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
                 school->deleteClass(classNumber);
                 fmt::print("Press Enter to continue...");
                 std::cin.get();
+                updateJsonFunc(schools);
                 break;
             }
             case 5: {
@@ -215,7 +240,7 @@ void displayClassMenu(int classNumber, const std::string& teacherName) {
     fmt::print("Enter your choice: ");
 }
 
-void handleClassMenu(const std::unique_ptr<Class>& selectedClass) {
+void handleClassMenu(const std::unique_ptr<Class>& selectedClass, std::vector<std::unique_ptr<School>>& schools, bool (&updateJsonFunc)(std::vector<std::unique_ptr<School>>&)) {
     while (true) {
         displayClassMenu(selectedClass->getClassNumber(), selectedClass->getClassTeacher());
         int choice;
@@ -227,6 +252,7 @@ void handleClassMenu(const std::unique_ptr<Class>& selectedClass) {
                 selectedClass->addStudent(SchoolFactory::createStudent());
                 fmt::print("Student added successfully. Press Enter to continue...");
                 std::cin.get();
+                updateJsonFunc(schools);
                 break;
             }
             case 2: {
