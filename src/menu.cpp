@@ -116,7 +116,8 @@ void displaySchoolMenu(const std::string& schoolName) {
     fmt::print("3. Select an existing class\n");
     fmt::print("4. Delete an existing class\n");
     fmt::print("5. Save to individual file\n");
-    fmt::print("6. Go back\n");
+    fmt::print("6. Display school info\n");
+    fmt::print("7. Go back\n");
     fmt::print("{}\n", std::string(50, '-'));
     fmt::print("Enter your choice: ");
 }
@@ -126,6 +127,7 @@ void handleSchoolMenu(std::unique_ptr<School>& school, std::vector<std::unique_p
         displaySchoolMenu(school->getSchoolName());
         int choice;
         std::cin >> choice;
+        fmt::print("{}\n", std::string(50, '-'));
         std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 
         switch (choice) {
@@ -221,6 +223,12 @@ void handleSchoolMenu(std::unique_ptr<School>& school, std::vector<std::unique_p
                 break;
             }
             case 6: {
+                school->displaySchoolInfo();
+                fmt::print("Press Enter to continue...");
+                std::cin.get();
+                break;
+            }
+            case 7: {
                 return;
             }
             default: {
@@ -245,6 +253,7 @@ void handleClassMenu(const std::unique_ptr<Class>& selectedClass, std::vector<st
         displayClassMenu(selectedClass->getClassNumber(), selectedClass->getClassTeacher());
         int choice;
         std::cin >> choice;
+        fmt::print("{}\n", std::string(50, '-'));
         std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 
         switch (choice) {

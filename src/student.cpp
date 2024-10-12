@@ -1,12 +1,15 @@
-#include "student.h"
 #include <iostream>
+#include <fmt/core.h>
+#include <fmt/color.h>
+
+#include "student.h"
 
 Student::Student(const std::string& name, const std::string& rollno, int age) : name(name), rollno(rollno), age(age) {};
 
 void Student::display() const {
-    std::cout << "Name: " << name << std::endl;
-    std::cout << "Roll No: " << rollno << std::endl;
-    std::cout << "Age: " << age << std::endl;
+    fmt::print(fg(fmt::color::cyan) | fmt::emphasis::bold, "Student Information:\n");
+    fmt::print("Name: {}\nRoll No: {}\nAge: {}\n", name, rollno, age);
+    fmt::print("------------------------\n");
 }
 
 std::string Student::getRollNo() const {

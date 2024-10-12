@@ -1,7 +1,8 @@
 #include <iostream>
 #include <fstream>
 #include <algorithm>
-
+#include <fmt/core.h>
+#include <fmt/color.h>
 #include "school.h"
 
 // Class members implementation
@@ -40,8 +41,11 @@ const std::vector<std::unique_ptr<Class>>& School::getClasses() const {
 }
 
 void School::displaySchoolInfo() const {
-    std::cout << "School name: " << schoolName << std::endl;
-    std::cout << "Classes: " << std::endl;
+    fmt::print(fg(fmt::color::magenta) | fmt::emphasis::bold, "School Information:\n");
+    fmt::print("School Name: {}\n", schoolName);
+    fmt::print("------------------------\n");
+
+    fmt::print(fg(fmt::color::blue) | fmt::emphasis::bold, "Classes:\n");
     for (const auto& schoolClass : classes) {
         schoolClass->displayClassInfo();
     }

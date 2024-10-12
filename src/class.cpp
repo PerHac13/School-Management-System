@@ -1,5 +1,6 @@
 #include <iostream>
-
+#include <fmt/core.h>
+#include <fmt/color.h>
 #include "class.h"
 
 Class::Class(int classNumber, const std::string& classTeacher) 
@@ -45,12 +46,12 @@ std::string Class::getClassTeacher() const {
 }
 
 void Class::displayClassInfo() const {
-    std::cout << std::endl;
-    std::cout << "Class number: " << classNumber << std::endl;
-    std::cout << "Class teacher: " << classTeacher << std::endl;
-    std::cout << "Students: " << std::endl;
+    fmt::print(fg(fmt::color::green) | fmt::emphasis::bold, "\nClass Information:\n");
+    fmt::print("Class Number: {}\nClass Teacher: {}\n", classNumber, classTeacher);
+    fmt::print("------------------------\n");
+
+    fmt::print(fg(fmt::color::yellow) | fmt::emphasis::bold, "Students:\n");
     for (const auto& student : students) {
-        // std::cout << "\n----------------" << std::endl;
         student->display();
     }
 }
