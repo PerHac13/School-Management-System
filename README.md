@@ -25,10 +25,12 @@ school_management_system/
 ├── CMakeLists.txt
 ├── src/
 │   ├── main.cpp
+|   ├── menu.cpp
 │   ├── school.cpp
 │   ├── class.cpp
 │   └── student.cpp
 ├── include/
+│   ├── menu.h
 │   ├── school.h
 │   ├── class.h
 │   └── student.h
@@ -132,7 +134,7 @@ school_management_system/
 
 ## Contributing
 
-This project is open for contributions. Please follow these steps to contribute:
+This project is not open for contributions. Please follow these steps to fork and do your own experiment:
 
 1. Fork the repository
 2. Create a new branch for your feature
