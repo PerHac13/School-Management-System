@@ -3,168 +3,279 @@
 #include <fstream>
 #include <vector>
 #include <memory>
+#include <limits>
+#include <fmt/core.h>
+#include <fmt/color.h>
+#include "school_factory.h"
 #include "school.h"
 #include "menu.h"
 
-
-void displayMainMenu() {
-    std::cout << "\nMain Menu\n";
-    std::cout << "1. Create a new school\n";
-    std::cout << "2. Select an existing school\n";
-    std::cout << "3. Save to file\n";
-    std::cout << "4. Exit\n";
-    std::cout << "Enter your choice: ";
+void clearScreen() {
+    #ifdef _WIN32
+        system("cls");
+    #else
+        system("clear");
+    #endif
 }
 
-void handleMainMenu(std::vector<std::shared_ptr<School>>& schools) {
+void printHeader(const std::string& title) {
+    clearScreen();
+    fmt::print(fg(fmt::color::gold), "{}\n", std::string(50, '*'));
+    fmt::print(fg(fmt::color::gold), "*{:^48}*\n", "");
+    fmt::print(fg(fmt::color::gold), "*{:^48}*\n", title);
+    fmt::print(fg(fmt::color::gold), "*{:^48}*\n", "");
+    fmt::print(fg(fmt::color::gold), "{}\n", std::string(50, '*'));
+}
+
+bool updateJson(std::vector<std::unique_ptr<School>>& schools){
+    nlohmann::json jsonData;
+    for (const auto& school : schools) {
+        jsonData.push_back(school->toJson());
+    }
+    std::ofstream file("../data/schools.json");
+    if(file.is_open()) {
+        file << jsonData.dump(4);
+        file.close();
+        return true;
+    } else {
+        return false;
+    }
+}
+
+void displayMainMenu() {
+    printHeader("Main Menu");
+    fmt::print("1. Create a new school\n");
+    fmt::print("2. Select an existing school\n");
+    fmt::print("3. Save to file\n");
+    fmt::print("4. Exit\n");
+    fmt::print("{}\n", std::string(50, '-'));
+    fmt::print("Enter your choice: ");
+}
+
+void handleMainMenu(std::vector<std::unique_ptr<School>>& schools) {
     int choice;
     std::cin >> choice;
-    std::cin.ignore();
+    std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 
     switch (choice) {
         case 1: {
-            schools.push_back(createSchool());
+            schools.push_back(SchoolFactory::createSchool());
+            fmt::print("School created successfully. Press Enter to continue...");
+            std::cin.get();
+            updateJson(schools);
             break;
         }
         case 2: {
             if (schools.empty()) {
-                std::cout << "No schools available. Please create a new school." << std::endl;
+                fmt::print("No schools available. Please create a new school.\n");
+                fmt::print("Press Enter to continue...");
+                std::cin.get();
                 break;
             }
+            printHeader("Select a School");
             for (size_t i = 0; i < schools.size(); ++i) {
-                std::cout << i + 1 << ". " << schools[i]->getSchoolName() << std::endl;
+                fmt::print("{}. {}\n", i + 1, schools[i]->getSchoolName());
             }
-            std::cout << "Select a school: ";
+            fmt::print("{}\n", std::string(50, '-'));
+            fmt::print("Select a school: ");
             int schoolChoice;
             std::cin >> schoolChoice;
-            std::cin.ignore();
-            if (schoolChoice > 0 && schoolChoice <= schools.size()) {
-                handleSchoolMenu(schools[schoolChoice - 1]);
+            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+            if (schoolChoice > 0 && schoolChoice <= static_cast<int>(schools.size())) {
+                handleSchoolMenu(schools[schoolChoice - 1], schools, updateJson);
             } else {
-                std::cout << "Invalid choice. Please try again." << std::endl;
+                fmt::print("Invalid choice. Press Enter to continue...");
+                std::cin.get();
             }
             break;
         }
         case 3: {
-            nlohmann::json jsonData;
-            for (const auto& school : schools) {
-                jsonData.push_back(nlohmann::json::parse(school->toJson().dump()));
-            }
-            std::ofstream file("../data/schools.json");
-            if(file.is_open()) {
-                file << jsonData.dump(4);
-                std::cout << "Data saved to data/schools.json" << std::endl;
-                file.close();
+            // TODO: Save to file specific file
+            if(updateJson(schools)) {
+                fmt::print("Data saved to data/schools.json\n");
             } else {
-                std::cout << "Error: Could not open file." << std::endl;
+                fmt::print(fg(fmt::color::red), "Error: Could not open file.\n");
             }
-            exit(0);
+            fmt::print("Press Enter to continue...");
+            std::cin.get();
+            break;
         }
         case 4:
-            std::cout << "Exiting program." << std::endl;
+            fmt::print("Exiting program.\n");
             exit(0);
         default:
-            std::cout << "Invalid choice. Please try again." << std::endl;
+            fmt::print(fg(fmt::color::red), "Invalid choice. Press Enter to continue...");
+            std::cin.get();
     }
 }
 
 void displaySchoolMenu(const std::string& schoolName) {
-    std::cout << "\nSchool: " << schoolName << std::endl;
-    std::cout << "1. Create a new class\n";
-    std::cout << "2. Select an existing class\n";
-    std::cout << "3. Delete an existing class\n";
-    std::cout << "4. Save to individuals file\n";
-    std::cout << "5. Go back\n";
-    std::cout << "Enter your choice: ";
+    printHeader(fmt::format("School: {}", schoolName));
+    fmt::print("1. Create a new class\n");
+    fmt::print("2. Create a new class with existing class\n");
+    fmt::print("3. Select an existing class\n");
+    fmt::print("4. Delete an existing class\n");
+    fmt::print("5. Save to individual file\n");
+    fmt::print("6. Display school info\n");
+    fmt::print("7. Go back\n");
+    fmt::print("{}\n", std::string(50, '-'));
+    fmt::print("Enter your choice: ");
 }
 
-
-void handleSchoolMenu(std::shared_ptr<School> school) {
+void handleSchoolMenu(std::unique_ptr<School>& school, std::vector<std::unique_ptr<School>>& schools, bool (&updateJsonFunc)(std::vector<std::unique_ptr<School>>&)) {
     while (true) {
         displaySchoolMenu(school->getSchoolName());
         int choice;
         std::cin >> choice;
-        std::cin.ignore();
+        fmt::print("{}\n", std::string(50, '-'));
+        std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 
         switch (choice) {
             case 1: {
-                school->addClass(createClass());
-                std::cout << "Class added successfully." << std::endl;
+                school->addClass(SchoolFactory::createClass());
+                fmt::print("Class added successfully. Press Enter to continue...");
+                std::cin.get();
+                updateJsonFunc(schools);
                 break;
             }
             case 2: {
-                std::vector<std::shared_ptr<Class>> classes = school->getClasses();
+                const auto& classes = school->getClasses();
                 if (classes.empty()) {
-                    std::cout << "No classes available. Please create a new class." << std::endl;
+                    fmt::print("No classes available. Please create a new class.\n");
+                    fmt::print("Press Enter to continue...");
+                    std::cin.get();
                     break;
                 }
-                std::cout << "Select a class: \n";
+                printHeader("Select a Class to Copy");
                 for (size_t i = 0; i < classes.size(); ++i) {
-                    std::cout << i + 1 << ". Class " << classes[i]->getClassNumber() << " by " << classes[i]->getClassTeacher() << std::endl;
+                    fmt::print("{}. Class {} by {}\n", i + 1, classes[i]->getClassNumber(), classes[i]->getClassTeacher());
                 }
-                std::cout << "Select a class by number: ";
+                fmt::print("{}\n", std::string(50, '-'));
+                fmt::print("Select a class by number: ");
                 int classChoice;
                 std::cin >> classChoice;
-                std::cin.ignore();
+                std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 
-                if (classChoice > 0 && classChoice <= classes.size()) {
-                    handleClassMenu(classes[classChoice - 1]);
+                if (classChoice > 0 && classChoice <= static_cast<int>(classes.size())) {
+                    school->addClass(SchoolFactory::createClass(classes[classChoice - 1]));
+                    fmt::print("New class created and added successfully. Press Enter to continue...");
+                    std::cin.get();
+                    updateJsonFunc(schools);
                 } else {
-                    std::cout << "Invalid choice. Please try again." << std::endl;
+                    fmt::print("Invalid choice. Press Enter to continue...");
+                    std::cin.get();
                 }
                 break;
             }
             case 3: {
-                int classNumber;
-                std::cout << "Enter class number to delete: ";
-                std::cin >> classNumber;
-                std::cin.ignore();
-                school->deleteClass(classNumber);
+                const auto& classes = school->getClasses();
+                if (classes.empty()) {
+                    fmt::print("No classes available. Please create a new class.\n");
+                    fmt::print("Press Enter to continue...");
+                    std::cin.get();
+                    break;
+                }
+                printHeader("Select a Class");
+                for (size_t i = 0; i < classes.size(); ++i) {
+                    fmt::print("{}. Class {} by {}\n", i + 1, classes[i]->getClassNumber(), classes[i]->getClassTeacher());
+                }
+                fmt::print("{}\n", std::string(50, '-'));
+                fmt::print("Select a class by number: ");
+                int classChoice;
+                std::cin >> classChoice;
+                std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+
+                if (classChoice > 0 && classChoice <= static_cast<int>(classes.size())) {
+                    handleClassMenu(classes[classChoice - 1], schools, updateJsonFunc);
+                } else {
+                    fmt::print("Invalid choice. Press Enter to continue...");
+                    std::cin.get();
+                }
                 break;
             }
             case 4: {
-                school->saveToFile();
+                int classNumber;
+                const auto& classes = school->getClasses();
+                if (classes.empty()) {
+                    fmt::print("No classes available. Please create a new class.\n");
+                    fmt::print("Press Enter to continue...");
+                    std::cin.get();
+                    break;
+                }
+                printHeader("Select a Class to delete");
+                for (size_t i = 0; i < classes.size(); ++i) {
+                    fmt::print("{}. Class {} by {}\n", i + 1, classes[i]->getClassNumber(), classes[i]->getClassTeacher());
+                }
+                fmt::print("{}\n", std::string(50, '-'));
+                fmt::print("Enter class number to delete: ");
+                std::cin >> classNumber;
+                std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+                school->deleteClass(classNumber);
+                fmt::print("Press Enter to continue...");
+                std::cin.get();
+                updateJsonFunc(schools);
                 break;
             }
             case 5: {
+                school->saveToFile();
+                fmt::print("Press Enter to continue...");
+                std::cin.get();
+                break;
+            }
+            case 6: {
+                school->displaySchoolInfo();
+                fmt::print("Press Enter to continue...");
+                std::cin.get();
+                break;
+            }
+            case 7: {
                 return;
             }
             default: {
-                std::cout << "Invalid choice. Please try again." << std::endl;
+                fmt::print(fg(fmt::color::red), "Invalid choice. Press Enter to continue...");
+                std::cin.get();
             }
         }
     }
 }
 
-void displayClassMenu() {
-    std::cout << "\n1. Add student to class\n";
-    std::cout << "2. Display class info\n";
-    std::cout << "3. Go back\n";
-    std::cout << "Enter your choice: ";
+void displayClassMenu(int classNumber, const std::string& teacherName) {
+    printHeader(fmt::format("Class {} by {}", classNumber, teacherName));
+    fmt::print("1. Add student to class\n");
+    fmt::print("2. Display class info\n");
+    fmt::print("3. Go back\n");
+    fmt::print("{}\n", std::string(50, '-'));
+    fmt::print("Enter your choice: ");
 }
 
-void handleClassMenu(std::shared_ptr<Class> selectedClass) {
+void handleClassMenu(const std::unique_ptr<Class>& selectedClass, std::vector<std::unique_ptr<School>>& schools, bool (&updateJsonFunc)(std::vector<std::unique_ptr<School>>&)) {
     while (true) {
-        displayClassMenu();
+        displayClassMenu(selectedClass->getClassNumber(), selectedClass->getClassTeacher());
         int choice;
         std::cin >> choice;
-        std::cin.ignore();
+        fmt::print("{}\n", std::string(50, '-'));
+        std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 
         switch (choice) {
             case 1: {
-                selectedClass->addStudent(createStudent());
-                std::cout << "Student added successfully." << std::endl;
+                selectedClass->addStudent(SchoolFactory::createStudent());
+                fmt::print("Student added successfully. Press Enter to continue...");
+                std::cin.get();
+                updateJsonFunc(schools);
                 break;
             }
             case 2: {
                 selectedClass->displayClassInfo();
+                fmt::print("Press Enter to continue...");
+                std::cin.get();
                 break;
             }
             case 3: {
                 return;
             }
             default: {
-                std::cout << "Invalid choice. Please try again." << std::endl;
+                fmt::print(fg(fmt::color::red), "Invalid choice. Press Enter to continue...");
+                std::cin.get();
             }
         }
     }

@@ -1,11 +1,40 @@
 #include <iostream>
-
+#include <fmt/core.h>
+#include <fmt/color.h>
 #include "class.h"
 
-Class::Class(int classNumber, const std::string& classTeacher) : classNumber(classNumber), classTeacher(classTeacher) {}
+Class::Class(int classNumber, const std::string& classTeacher) 
+    : classNumber(classNumber), classTeacher(classTeacher) {
+    students.reserve(50);
+}
 
-void Class::addStudent(const std::shared_ptr<Student>& student) {
-    students.push_back(student);
+Class::Class(int classNumber, const std::string& classTeacher, const Class& other) 
+    : classNumber(classNumber), classTeacher(classTeacher) {
+    students.reserve(50);
+    for (const auto& student : other.students) {
+        students.push_back(std::make_unique<Student>(*student));
+    }
+}
+
+void Class::reserveStudentCapacity(size_t capacity){
+    students.reserve(capacity);
+}
+
+bool Class::hasStudent(const Student& student) const {
+    for (const auto& studentPtr : students) {
+        if (*studentPtr == student) {
+            return true;
+        }
+    }
+    return false;
+}
+
+void Class::addStudent(std::unique_ptr<Student> student) {
+    if(hasStudent(*student)){
+        std::cout << "Student with roll number " << student->getRollNo() << " already exists in the class." << std::endl;
+        return;
+    }
+    students.push_back(std::move(student));
 }
 
 int Class::getClassNumber() const {
@@ -17,12 +46,26 @@ std::string Class::getClassTeacher() const {
 }
 
 void Class::displayClassInfo() const {
-    std::cout << "Class number: " << classNumber << std::endl;
-    std::cout << "Class teacher: " << classTeacher << std::endl;
-    std::cout << "Students: " << std::endl;
+    fmt::print(fg(fmt::color::green) | fmt::emphasis::bold, "\nClass Information:\n");
+    fmt::print("Class Number: {}\nClass Teacher: {}\n", classNumber, classTeacher);
+    fmt::print("------------------------\n");
+
+    fmt::print(fg(fmt::color::yellow) | fmt::emphasis::bold, "Students:\n");
     for (const auto& student : students) {
         student->display();
     }
+}
+
+bool Class::operator == (const Class& other) const {
+    return classNumber == other.classNumber && classTeacher == other.classTeacher;
+}
+
+bool Class::operator < (const Class& other) const {
+    return students.size() < other.students.size();
+}
+
+bool Class::operator > (const Class& other) const {
+    return students.size() > other.students.size();
 }
 
 nlohmann::json Class::toJson() const {
@@ -36,13 +79,10 @@ nlohmann::json Class::toJson() const {
     return jsonData;
 }
 
-std::shared_ptr<Class> createClass() {
-    std::string teacher;
-    int classNumber;
-    std::cout << "Enter the class number: ";
-    std::cin >> classNumber;
-    std::cin.ignore();
-    std::cout << "Enter the name of the class teacher: ";
-    std::getline(std::cin, teacher);
-    return std::make_shared<Class>(classNumber, teacher);
+std::unique_ptr<Class> Class::createFromJson(const nlohmann::json& jsonData) {
+    auto classPtr = std::make_unique<Class>(jsonData["classNumber"], jsonData["classTeacher"]);
+    for (const auto& studentJSON : jsonData["students"]) {
+        classPtr->addStudent(Student::createFromJson(studentJSON));
+    }
+    return classPtr;
 }

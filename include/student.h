@@ -12,7 +12,10 @@ class Student {
         Student(const std::string& name, const std::string& rollno, int age);
         
         void display() const;
-        nlohmann::json toJson();
-};
+        std::string getRollNo() const;
+        nlohmann::json toJson() const;
 
-std::shared_ptr<Student> createStudent();
+        static std::unique_ptr<Student> createFromJson(const nlohmann::json& jsonData);
+
+        bool operator == (const Student& other) const;
+};

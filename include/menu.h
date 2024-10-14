@@ -1,13 +1,15 @@
-#include <iostream>
 #include <string>
 #include <vector>
 #include <memory>
 #include "school.h"
 
 // Function prototypes
+void clearScreen();
+void printHeader(const std::string& title);
+bool updateJson(std::vector<std::unique_ptr<School>>& schools);
 void displayMainMenu();
-void handleMainMenu(std::vector<std::shared_ptr<School>>& schools);
+void handleMainMenu(std::vector<std::unique_ptr<School>>& schools);
 void displaySchoolMenu(const std::string& schoolName);
-void handleSchoolMenu(std::shared_ptr<School> school);
-void displayClassMenu();
-void handleClassMenu(std::shared_ptr<Class> selectedClass);
+void handleSchoolMenu(std::unique_ptr<School>& school, std::vector<std::unique_ptr<School>>& schools, bool (&updateJsonFunc)(std::vector<std::unique_ptr<School>>&));
+void displayClassMenu(int classNumber, const std::string& teacherName);
+void handleClassMenu(const std::unique_ptr<Class>& selectedClass, std::vector<std::unique_ptr<School>>& schools, bool (&updateJsonFunc)(std::vector<std::unique_ptr<School>>&));
