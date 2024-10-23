@@ -9,6 +9,7 @@
 #include "school_factory.h"
 #include "school.h"
 #include "menu.h"
+#include "query_system.h"
 
 void clearScreen() {
     #ifdef _WIN32
@@ -47,7 +48,8 @@ void displayMainMenu() {
     fmt::print("1. Create a new school\n");
     fmt::print("2. Select an existing school\n");
     fmt::print("3. Save to file\n");
-    fmt::print("4. Exit\n");
+    fmt::print("4. Query system\n");
+    fmt::print("5. Exit\n");
     fmt::print("{}\n", std::string(50, '-'));
     fmt::print("Enter your choice: ");
 }
@@ -100,7 +102,11 @@ void handleMainMenu(std::vector<std::unique_ptr<School>>& schools) {
             std::cin.get();
             break;
         }
-        case 4:
+        case 4: {
+            handleQueryMenu();
+            break;
+        }
+        case 5:
             fmt::print("Exiting program.\n");
             exit(0);
         default:
@@ -278,5 +284,73 @@ void handleClassMenu(const std::unique_ptr<Class>& selectedClass, std::vector<st
                 std::cin.get();
             }
         }
+    }
+}
+
+
+void displayQueryMenu() {
+    printHeader("Query Menu");
+    fmt::print("1. Search schools\n");
+    fmt::print("2. Show school data\n");
+    fmt::print("3. Compare classes\n");
+    fmt::print("4. Count total students\n");
+    fmt::print("5. Count classes with teacher name starting with\n");
+    fmt::print("6. Go back\n");
+    fmt::print("{}\n", std::string(50, '-'));
+    fmt::print("Enter your choice: ");
+}
+
+void handleQueryMenu() {
+    QuerySystem qs("../data/schools.json");
+    while (true) {
+        displayQueryMenu();
+        int choice;
+        std::cin >> choice;
+        std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+
+        switch (choice) {
+            case 1: {
+                fmt::print("Enter search term: ");
+                std::string searchTerm;
+                std::getline(std::cin, searchTerm);
+                qs.searchSchools(searchTerm);
+                break;
+            }
+            case 2: {
+                fmt::print("Enter school name: ");
+                std::string schoolName;
+                std::getline(std::cin, schoolName);
+                qs.showSchoolData(schoolName);
+                break;
+            }
+            case 3: {
+                std::string school1, school2;
+                fmt::print("Enter first school name: ");
+                std::getline(std::cin, school1);
+                fmt::print("Enter second school name: ");
+                std::getline(std::cin, school2);
+                qs.compareClasses(school1, school2);
+                break;
+            }
+            case 4: {
+                int totalStudents = qs.countStudents();
+                fmt::print("Total number of students: {}\n", totalStudents);
+                break;
+            }
+            case 5: {
+                fmt::print("Enter prefix for teacher name: ");
+                std::string prefix;
+                std::getline(std::cin, prefix);
+                int count = qs.countClassesStartingWith(prefix);
+                fmt::print("Number of classes with teachers starting with '{}': {}\n", prefix, count);
+                break;
+            }
+            case 6:
+                return;
+            default:
+                fmt::print(fg(fmt::color::red), "Invalid choice. Please try again.\n");
+        }
+        fmt::print("Press Enter to continue...");
+        std::cin.get();
     }
 }

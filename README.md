@@ -26,11 +26,13 @@ school_management_system/
 ├── src/
 │   ├── main.cpp
 |   ├── menu.cpp
+|   ├── query_system.cpp
 │   ├── school.cpp
 │   ├── class.cpp
 │   └── student.cpp
 ├── include/
 │   ├── menu.h
+|   ├── query_system.h
 │   ├── school.h
 │   ├── class.h
 │   └── student.h
