@@ -12,6 +12,12 @@ FetchContent_Declare(
   GIT_TAG        e69e5f977d458f2650bb346dadf2ad30c5320281) # 10.2.1
 FetchContent_MakeAvailable(fmt)
 
+FetchContent_Declare(json
+    GIT_REPOSITORY https://github.com/nlohmann/json
+    GIT_TAG v3.11.3
+)
+FetchContent_MakeAvailable(json)
+
 include_directories(include)
 include_directories(lib)
 
@@ -19,4 +25,4 @@ file(GLOB SOURCES "src/*.cpp")
 
 add_executable(SchoolManagementSystem ${SOURCES})
 
-target_link_libraries(SchoolManagementSystem fmt::fmt)
+target_link_libraries(SchoolManagementSystem fmt::fmt nlohmann_json::nlohmann_json)
